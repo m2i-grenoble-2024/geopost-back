@@ -1,10 +1,37 @@
 <?php
 
 namespace App\Repository;
+use App\Entity\Category;
 use App\Entity\Post;
+use DateTimeImmutable;
 
 class PostRepository {
 
+    public function findAll(): array {
+        $connection = Database::connect();
+        $query = $connection->prepare('SELECT *, post.id post_id FROM post LEFT JOIN category ON post.category_id=category.id');
+        $query->execute();
+        $results = $query->fetchAll();
+
+        $list = [];
+        foreach($results as $line) {
+            $category = new Category($line['label'], $line['category_id']);
+            $post = new Post(
+                $line['message'],
+                $line['latitude'],
+                $line['longitude'], 
+                new DateTimeImmutable($line['posted_at']),
+                $line['author'],
+                $line['picture'],
+                $line['post_id']
+            );
+            if($category->getId() != null) {
+                $post->setCategory($category);
+            }
+            $list[]  = $post;
+        }
+        return $list;
+    }
 
     public function persist(Post $post) {
         $connection = Database::connect();

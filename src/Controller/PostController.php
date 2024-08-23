@@ -12,6 +12,13 @@ class PostController extends AbstractController {
 
     public function __construct(private PostRepository $repo) {}
 
+    #[Route(methods:'GET')]
+    public function all() {
+        return $this->json(
+            $this->repo->findAll()
+        );
+    }
+
     #[Route(methods:'POST')]
     public function add(#[MapRequestPayload] Post $post) {
         $post->setPostedAt(new \DateTimeImmutable());
